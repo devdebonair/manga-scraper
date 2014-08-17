@@ -1,0 +1,14 @@
+{
+  "name": "manga-scraper",
+  "version": "0.0.1",
+  "description": "A node module to scrape various manga scanlation sites and api's.",
+  "repository": "",
+  "author": "Vincent Moore",
+  "dependencies": {
+    "cheerio": "~0.17.0",
+    "oop-module": "~0.0.5",
+    "queue": "~2.2.0",
+    "request": "~2.36.0",
+    "xml2js": "~0.4.4"
+  }
+}
