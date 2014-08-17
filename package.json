@@ -1,6 +1,8 @@
 {
   "name": "manga-scraper",
   "version": "0.0.1",
+  "main": "index.js",
+  "private": true,
   "description": "A node module to scrape various manga scanlation sites and api's.",
   "repository": "",
   "author": "Vincent Moore",
