@@ -270,6 +270,15 @@ kissmanga.series({ mangaName: 'naruto'}, function( err, data ){
 */
 ```
 
+
+TODO
+======
+Fakku
+MangaPanda
+MangaDoom
+AnimeList
+
+
 License
 ----
 
