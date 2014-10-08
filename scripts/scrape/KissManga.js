@@ -389,7 +389,8 @@ function helper_fetchChapterPages( args, callback ){
             if( !err )
             {
                 var $ = DOM;
-                var regex = /http:\/\/[0-9]+\.[a-zA-Z]+\.blogspot\.com\/.+"/gi;
+                
+                var regex = /http:\/\/.+\..+\..+(\.jpg|\.jpeg|\.png).*"/gi; 
                 var html = $('html').html();
                 
                 if ( !regex.test( html ) )
