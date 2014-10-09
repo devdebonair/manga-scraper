@@ -7,7 +7,7 @@ function MangaPanda()
 
 MangaPanda.prototype = {
     
-    directory: function()
+    directory: function( callback )
     {
         var networkOptions = {
             url: this.baseUrl + '/alphabetical',
@@ -16,14 +16,30 @@ MangaPanda.prototype = {
         
         network.request({
             options: networkOptions,
-            callback: callback_directory
+            callback: function( err, DOM )
+            {
+                if( err )
+                {
+                    callback( err, null );
+                    return;
+                }
+                
+                var $ = DOM;
+                var directory = [];
+                
+                $('.series_col ul a').each(function(){
+                    var mangaName = $(this).attr("href");
+                    mangaName = mangaName.replace(/\/?[0-9]*\//gi,'').replace(/.html/gi,'');
+                    directory.push(mangaName);
+                });
+                callback( null, directory );
+            }
         });
-        
-        
     },
     
-    mangaInfo: function()
+    mangaInfo: function( args )
     {
+        var mangaName = args.mangaName;
         
     },
     
@@ -39,22 +55,6 @@ MangaPanda.prototype = {
 }
 
 
-function callback_directory( err, DOM )
-{
-    if( err )
-    {
-        return err;
-    }
-    
-    var $ = DOM;
-    var directory = [];
-    
-    $('.series_col ul a').each(function(){
-        var mangaName = $(this).attr("href");
-        mangaName = mangaName.replace(/\/?[0-9]*\//gi,'').replace(/.html/gi,'');
-        console.log(mangaName);
-    });
-}
 
 function buildError( name, message )
 {
