@@ -40,30 +40,17 @@ MangaPanda.prototype = {
     
     mangaInfo: function( args, callback )
     {
-        /*
-            title
-            description
-            coverUrl
-            release
-            artist
-            author
-            genres []
-            scanOrigin
-            numOfChapters
-            status
-            chapters [ number, title, pages [empty] ]
-        */
         var mangaName = args.mangaName;
         var requestUrl = this.baseUrl + '/' + mangaName;
         var networkOptions = {
             url: requestUrl,
             mangaName: mangaName
-        }
+        };
         
         network.request({
             options: networkOptions,
-            callback: function( err, DOM ){
-                
+            callback: function( err, DOM )
+            {
                 var $ = DOM;
             
                 var title = $('.aname').text();
@@ -118,16 +105,69 @@ MangaPanda.prototype = {
         
     },
     
-    chapter: function()
+    chapter: function( args, callback )
     {
+        var mangaName = args.mangaName;
+        var chapterNumber = args.chapterNumber;
         
+        var networkOptions = {
+            url: this.baseUrl + '/' + mangaName + '/' + chapterNumber,
+            mangaName: mangaName
+        };
+        
+        network.request({
+            options: networkOptions,
+            callback: function( err, DOM )
+            {
+                if(err)
+                {
+                    callback( err, null );
+                }
+                
+                //Grab first 2 pages, compare the difference, and infer the rest of pages
+                var $ = DOM;
+                var pageOne = $('#img').attr('src');
+                
+                //Second page is within a script
+                var pageTwo = $('head').html()
+                                        .match(/document\['pu'\]\s=\s'http.*/)[0]
+                                        .replace('document[\'pu\'] = ','');
+                                        
+                var regexPageLinkNum = /[0-9]+\.(jpg|png|jpeg)/;
+                
+                var chapterBaseUrl = pageOne.replace(pageOne.match(regexPageLinkNum)[0],'');
+                var topLevelDomain = pageOne.match(/\.(jpg|png|jpeg)/)[0];
+                
+                var pageOneNum = parseInt(pageOne.match(regexPageLinkNum)[0].replace(/\.(jpg|png|jpeg)/,''));
+                var pageTwoNum = parseInt(pageTwo.match(regexPageLinkNum)[0].replace(/\.(jpg|png|jpeg)/,''));
+                var diffToInfer = pageTwoNum - pageOneNum;
+                var numOfPages = $('#pageMenu').children('option').length;
+                
+                var chapter = [];
+                
+                chapter.push({ number: 1, image: pageOne });
+                
+                var currentChapterDiff = diffToInfer;
+                for(var i = 2; i <= numOfPages; i++)
+                {
+                    var page = {};
+                    page.number = i;
+                    
+                    var image = chapterBaseUrl + (pageOneNum + currentChapterDiff) + topLevelDomain;
+                    page.image = image;
+                    chapter.push(page);
+                    currentChapterDiff += diffToInfer;
+                }
+                console.log(chapter);
+            }
+        });
     },
     
     series: function()
     {
         
     }
-}
+};
 
 
 
