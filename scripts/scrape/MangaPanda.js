@@ -1,6 +1,7 @@
 var network = require("../MangaRequest");
+var Queue = require("queue");
 
-function MangaPanda()
+var MangaPanda = function()
 {
     this.baseUrl = 'http://www.mangapanda.com';
 }
@@ -96,7 +97,7 @@ MangaPanda.prototype = {
                     scanOrigin: scanOrigin,
                     numOfChapters: numOfChapters,
                     status: status,
-                    chapers: chapters
+                    chapters: chapters
                 };
                 
                 callback( null, mangaObject );
@@ -134,7 +135,6 @@ MangaPanda.prototype = {
                                         .replace('document[\'pu\'] = ','');
                                         
                 var regexPageLinkNum = /[0-9]+\.(jpg|png|jpeg)/;
-                
                 var chapterBaseUrl = pageOne.replace(pageOne.match(regexPageLinkNum)[0],'');
                 var topLevelDomain = pageOne.match(/\.(jpg|png|jpeg)/)[0];
                 
@@ -158,14 +158,49 @@ MangaPanda.prototype = {
                     chapter.push(page);
                     currentChapterDiff += diffToInfer;
                 }
-                console.log(chapter);
+                callback(null, chapter);
             }
         });
     },
     
-    series: function()
+    series: function( args, callback )
     {
+        var mangaName = args.mangaName;
+        var queue = new Queue({ concurrency: 5, timeout: 3000 });
+        var manga = null;
         
+        var mangapanda = this;
+                    
+        this.mangaInfo({ mangaName: mangaName }, function( err, info ){
+            if(err)
+            {
+                callback(err, null);
+                return;
+            }
+            
+            var manga = info;
+            manga.chapters.forEach( function( element ){
+                queue.push(function(){
+                    
+                    mangapanda.chapter({ mangaName: mangaName, chapterNumber: element.number },
+                        
+                        function( err, pages ){
+                            if(err)
+                            {
+                                callback(err, null);
+                                return;
+                            }
+                            element.pages = pages;
+                        }
+                    );
+                });
+            });
+
+            queue.start();
+            queue.on('end', function(){
+                callback(null, manga);
+            });
+        });
     }
 };
 
